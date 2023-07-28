@@ -1,0 +1,131 @@
+:root {
+    --primary-color: #1dbfaf
+}
+  
+* {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    /* height: 100vh; */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #efefef;
+}
+
+.form {
+    width: 360px;
+    /* height: 1000px;   */
+    padding: 32px 20px;
+    background-color: #fff;
+}
+
+.form-group {
+    padding-bottom: 5px;
+    position: relative;
+}
+
+.form-group.invalid [name] {
+    border-color: #f33a58;
+}
+
+.form-group.invalid .form-message {
+    color: #f33a58;
+}
+
+.form-group [name][type="radio"] {
+    display: inline;
+    width: auto;
+    margin-left: 60px;
+}
+
+.form-group [name][type="checkbox"] {
+    display: inline;
+    font-size: 16px;
+    width: 30px;
+    margin-left: 100px;
+}
+
+.form-group p {
+    margin-bottom: 10px;
+}
+
+/* .form-group.center {
+    text-align: center;
+} */
+/* .form-group label {
+    display: inline-block;
+    min-width: 80px;
+} */
+
+.form-message {
+    font-size: 12px;
+    display: inline-block;
+    color: transparent;
+}
+
+.show-hide {
+    position: absolute;
+    top: 0;
+    right: 0;
+    transform: translate(-7px, 30px);
+    color: var(--primary-color);
+    cursor: pointer;
+}
+
+
+.heading,
+.desc {
+    text-align: center;
+}
+
+.heading {
+    margin-bottom: 12px;
+}
+
+.desc {
+    margin-bottom: 32px;
+    color: #888;
+}
+
+.desc > span {
+    color: red;
+}
+
+.form [name] {
+    margin-top: 4px;
+    width: 100%;
+    padding: 8px;
+    outline: none;
+    border: 1px solid #b3b3b3;
+    border-radius: 3px;
+}
+
+.form [name]:hover {
+    border-color: var(--primary-color);
+}
+
+.form [name]:focus {
+    border-color: var(--primary-color);
+}
+
+.form-submit {
+    width: 100%;
+    margin-top: 16px;
+    padding: 12px 0;
+    border-radius: 8px;
+    border: none;
+    background-color: var(--primary-color);
+    color: #fff;
+    font-weight: bold;
+    cursor: pointer;
+    transition: opacity 0.2s linear;
+}
+
+.form-submit:hover {
+    opacity: 0.7;
+}
