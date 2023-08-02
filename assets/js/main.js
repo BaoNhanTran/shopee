@@ -1,4 +1,9 @@
 function validator(options) {
+    // initialize the important containers
+    var selectorRules = {}
+    var radioList = []
+    var inputValue = []
+
     // find the HTML element that matches the container's css selector in the case of the input has many parents
     function getParent(element, selector) {
         while (element.parentElement) {
@@ -8,10 +13,67 @@ function validator(options) {
             element = element.parentElement
         }
     }
-    // initialize the important containers
-    var selectorRules = {}
-    var radioList = []
-    var inputValue = []
+    
+    // take the error message into view
+    function invalidIntoView() {
+        // use intersectionObserver
+        // const observer = new IntersectionObserver((entries) => {
+        //     entries.forEach((entry) => {
+        //         if (0 <= entry.intersectionRatio >= 1) {
+        //             setTimeout(function() {
+        //                 entry.target.scrollIntoView(
+        //                     {
+        //                         behavior: 'smooth',
+        //                         block: 'end',
+        //                     }
+        //                 )
+        //                 console.log('intersection is running');
+        //             }, 300)
+        //         }
+        //     })
+        // })
+
+        // invalidInputs = formElement.querySelectorAll('.invalid')
+
+        // invalidInputs.forEach(function(invalidInput) {
+        //     observer.observe(invalidInput)
+        // });
+
+        // Do not check if the input element is in the viewport or not
+        // if (invalidInputs.length === 1) {
+        //     setTimeout(function() {
+        //         invalidInputs[0].scrollIntoView(
+        //             {
+        //                 behavior: 'smooth',
+        //                 block: 'end',
+        //             }
+        //         )
+        //         // console.log(invalidInputs[0]);
+        //     }, 300)
+        // }
+        
+        // user getBoundingClientRect
+        var allInvalidOutOfViewport = true
+        invalidInputs = formElement.querySelectorAll('.invalid')
+        invalidInputs.forEach(function(invalidInput) {
+            if (invalidInput.getBoundingClientRect().top > 0) {
+                allInvalidOutOfViewport = false
+            }
+        })
+        if (allInvalidOutOfViewport) {
+            invalidInputs.forEach(function(invalidInput) {
+                setTimeout(function() {
+                    invalidInput.scrollIntoView(
+                        {
+                            behavior: 'smooth',
+                            block: 'end',
+                        }
+                        )
+                }, 300)
+            });
+        }
+    }
+
 
     // detect and throw an error when the user leave the input blank
     function validate(inputElement, rule) {
@@ -89,6 +151,8 @@ function validator(options) {
                     isFormValid = false
                 }
             })
+
+            invalidIntoView()
             
             if (isFormValid) {
                 // case submit by using javascript
