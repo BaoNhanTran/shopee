@@ -1,368 +1,469 @@
-function validator(options) {
-    // initialize the important containers
-    var selectorRules = {}
-    var radioList = []
-    var inputValue = []
+const $ = document.querySelector.bind(document)
+const $$ = document.querySelectorAll.bind(document)
 
-    // find the HTML element that matches the container's css selector in the case of the input has many parents
-    function getParent(element, selector) {
-        while (element.parentElement) {
-            if (element.parentElement.matches(selector)) {
-                return element.parentElement
-            }
-            element = element.parentElement
-        }
+const openAuthFormBtns = $$('.open-auth-form')
+const openAuthFormWrappers = $$('.open-auth-form-wrapper')
+const modal = $('.modal')
+const modalOverlay = $('.modal__overlay')
+const backBtns = $$('.auth-form__control-back')
+const authForms = $$('.auth-form')
+const switchBtns = $$('.auth-form__switch-btn')
+const headerLogo = $('.header__logo')
+const headerSearch = $('.header__search')
+const headerSearchSelect = $('.header__search-select')
+const headerSearchOption = $('.header__search-option')
+const headerSearchOptionItems = $$('.header__search-option-item')
+const headerSearchInput = $('.header__search-input')
+const headerSearchHistory = $('.header__search-history')
+const headerSearchHistoryItems = $$('.header__search-history-item')
+const headerMobileSearchHistory = $('.header-mobile__search-history')
+const itemOptionWrappers = $$('.item--option-wrapper')
+const numberOfProduct = $('.header__cart-notice')
+const headerCartItems = $$('.header__cart-item')
+const headerNavbarUserContainer = $('.header__navbar-user-container')
+const headerNavbarUserItems = $$('.header__navbar-user-item')
+const containerFilterMenuBtns = $$('.container__filter-menu-btn')
+const selectContainers = $$('.select-container')
+const selectBtns = $$('.select-btn')
+const itemOptionWithChecks = $$('.item--option-with-check')
+const selectHoverBtns = $$('.select-hover-btn')
+const currentPageElement = $('.container__filter-page-current')
+const totalPageElement = $('.container__filter-page-total')
+const productItems = $$('.product-item')
+const likeWrappers = $$('.product-main__action-like')
+const ratings = $$('.product-main__action-rating')
+const prevBtns = $$('.prev-btn')
+const nextBtns = $$('.next-btn')
+const paginationPageWrapper = $('.pagination__page-wrapper')
+const headerMobileTabletUser = $('.header-mobile-tablet__user')
+const upDownArrowIcons = $$('.up-down-arrow-icon')
+const headerMobileSearch = $('.header-mobile__search')
+const headerMobileSearchIconWrapper = $('.header-mobile__search-icon-wrapper')
+const headerCartItemDelete = $$('.header__cart-item-delete')
+const headerMobileList = $('.header-mobile-list')
+const categoryWrapper = $('.category-wrapper')
+const categoryItemLinks = $$('.category-item__link')
+const headerSortLinkSelect = $('.container-sort-bar__link-select')
+const headerSortIconPrices = $$('.container-sort-bar__icon-price')
+const containerSortBar = $('.container-sort-bar')
+const containerSortBarItems = $$('.container-sort-bar__item')
+const containerSortBarLinks = $$('.container-sort-bar__link-select .option-link')
+const containerSortBarUnderline = $('.container-sort-bar__underline')
+const upDownArrowIconWrapper = $('.up-down-arrow-icon-wrapper')
+const headerMobileSearchOptionItems = $$('.header-mobile__search-option-item')
+const headerMobileSearchInput = $('.header-mobile__search-input')
+const placeHolders = [
+    'Tìm trong shop này',
+    'Tìm trong tất cả các shop'
+]
+var currentPage = 1
+var totalPage = +totalPageElement.innerText
+
+backBtns.forEach(function(backBtn) {
+    backBtn.onclick = function() {
+        modal.style = 'display: none';
     }
-    
-    // take the error message into view
-    function invalidIntoView() {
-        // use intersectionObserver
-        // const observer = new IntersectionObserver((entries) => {
-        //     entries.forEach((entry) => {
-        //         if (0 <= entry.intersectionRatio >= 1) {
-        //             setTimeout(function() {
-        //                 entry.target.scrollIntoView(
-        //                     {
-        //                         behavior: 'smooth',
-        //                         block: 'end',
-        //                     }
-        //                 )
-        //                 console.log('intersection is running');
-        //             }, 300)
-        //         }
-        //     })
-        // })
+})
 
-        // invalidInputs = formElement.querySelectorAll('.invalid')
+// Hide the modal when the user clicks on the area outside it
+modalOverlay.onclick = function() {
+    modal.style = 'display: none';
+}
 
-        // invalidInputs.forEach(function(invalidInput) {
-        //     observer.observe(invalidInput)
-        // });
-
-        // Do not check if the input element is in the viewport or not
-        // if (invalidInputs.length === 1) {
-        //     setTimeout(function() {
-        //         invalidInputs[0].scrollIntoView(
-        //             {
-        //                 behavior: 'smooth',
-        //                 block: 'end',
-        //             }
-        //         )
-        //         // console.log(invalidInputs[0]);
-        //     }, 300)
-        // }
-        
-        // user getBoundingClientRect
-        var allInvalidOutOfViewport = true
-        invalidInputs = formElement.querySelectorAll('.invalid')
-        invalidInputs.forEach(function(invalidInput) {
-            if (invalidInput.getBoundingClientRect().top > 0) {
-                allInvalidOutOfViewport = false
-            }
-        })
-        if (allInvalidOutOfViewport) {
-            invalidInputs.forEach(function(invalidInput) {
-                setTimeout(function() {
-                    invalidInput.scrollIntoView(
-                        {
-                            behavior: 'smooth',
-                            block: 'end',
-                        }
-                        )
-                }, 300)
-            });
-        }
-    }
-
-
-    // detect and throw an error when the user leave the input blank
-    function validate(inputElement, rule) {
-        const errorElement = getParent(inputElement, options.formGroupSelector).querySelector(options.errorSelector);
-        var errorMessage
-        const rules = selectorRules[rule.selector]
-        // retrieve the rules of the selected element, identify the violated rule, and activated that rule
-        for (i = 0; i < rules.length; i++) {
-            // call function test()
-            switch (inputElement.type) {
-                case 'radio':
-                case 'checkbox':
-                    errorMessage = rules[i](
-                        formElement.querySelector(rule.selector + ':checked')
-                    )
-                break
-                default:
-                    errorMessage = rules[i](inputElement.value)
-            }
-            // if (inputElement.type === 'radio') {
-            //     var radioChecked = false
-            //     radioList.forEach(function(radio){
-            //         if (radio.checked) {
-            //             radioChecked = true
-            //         }
-            //     })
-            //     errorMessage = rules[i](radioChecked)
-            // } else {
-            //     errorMessage = rules[i](inputElement.value)
-            // }
-            if (errorMessage) break
-        }
-        if (errorMessage) {
-            errorElement.innerText = errorMessage
-            getParent(inputElement, options.formGroupSelector).classList.add('invalid')
-        }
-        return errorMessage
-    }
-    
-    // show and hide the password after the user clicks on eye icon
-    function handlePassword(showHideElement, rule) {
-        const showHideBtn = getParent(showHideElement, options.formGroupSelector).querySelector(options.showHide)
-        const isHide = rule.test(showHideElement.type)
-        if (isHide) {
-            showHideElement.type = 'text'
-            showHideBtn.innerHTML = '<i class="fa-regular fa-eye-slash"></i>'
-        } else {
-            showHideElement.type = 'password'
-            showHideBtn.innerHTML = '<i class="fa-regular fa-eye"></i>'
-        }
-    }
-
-    // remove the error message from the confirmation input when the user rewrites the password to match the confirmation password
-    function update(updateElement, rule) {
-        var errorMessage = rule.test(updateElement.value)
-        const confirmElement = document.querySelector(rule.confirmSelector)
-        if (confirmElement && !errorMessage) {
-            confirmElement.parentElement.classList.remove('invalid')
-        }
-    }
-
-    const formElement = document.querySelector(options.form)
-
-    // handle the focus and blur events of the input and require the user to not leave the input blank
-    if (formElement) {
-        
-        // activate all the rules when the user clicks on the submit button
-        formElement.onsubmit = (e) => {
-            e.preventDefault()
-            var isFormValid = true
-            options.rules.forEach(function(rule) {
-                const inputElement = document.querySelector(rule.selector)
-                var isError = validate(inputElement, rule)
-                if (isError) {
-                    isFormValid = false
-                }
-            })
-
-            invalidIntoView()
-            
-            if (isFormValid) {
-                // case submit by using javascript
-                if (typeof options.onSubmit === 'function') {
-                    var enableInputs = formElement.querySelectorAll('[name]:not([disabled])')
-                    var formValues = Array.from(enableInputs).reduce(function(values, input) {
-                        switch (input.type) {
-                            case 'radio':
-                                if (input.checked) {
-                                    values[input.name] = input.value
-                                }
-                                if (!values[input.name]) {
-                                    values[input.name] = ''
-                                }
-                                // values[input.name] = formElement.querySelector('[name="' + input.name + '"]:checked') ? formElement.querySelector('[name="' + input.name + '"]:checked').value : '';
-                                break
-                            case 'checkbox':
-                                // lỗi xảy ra khi ta chỉ check vào những box phía trên còn phía dưới thì ko
-                                // khi duyệt đến những box ở phía dưới ko đk check thì mảng chứa value
-                                // của các box đã chọn sẽ bị ghi đè lại bằng một mảng rỗng []
-                                // if (!input.checked) {
-                                //     values[input.name] = ''
-                                //     return values
-                                // }
-                                // if (input.checked) {
-                                //     inputValue.push(input.value)
-                                //     values[input.name] = inputValue
-                                // }
-                                // if (inputValue.length === 1) {
-                                //     values[input.name] = inputValue.join('')
-                                // }
-                                // if (!Array.isArray(values[input.name])) {
-                                //     values[input.name] = []
-                                // }
-                                // if (input.checked) {
-                                //     values[input.name].push(input.value)
-                                // }
-                                if (input.checked) {
-                                    if (Array.isArray(values[input.name])) {
-                                        values[input.name].push(input.value)
-                                    } else {
-                                        values[input.name] = [input.value]
-                                    }
-                                }
-                                // if (values[input.name].length === 0) {
-                                //     values[input.name] = ''
-                                // }
-                                if (!values[input.name]) {
-                                    values[input.name] = ''
-                                }
-                                // values[input.name].push(input.value)
-                                break
-                            case 'file':
-                                values[input.name] = input.files
-                                break
-                            default:
-                                values[input.name] = input.value
-                        }
-                        return values
-                    }, {})
-                    options.onSubmit(formValues)
-                    alert('you has just signed up successfully')
-                } 
-                // case submit with default event
-                else {
-                    formElement.submit()
-                }
-            } 
-        }
-
-        // iterate through each rule and handle (listen event)
-        options.rules.forEach(function(rule) {
-
-            // save the rules for each input element
-            if (Array.isArray(selectorRules[rule.selector])) {
-                selectorRules[rule.selector].push(rule.test)
-            } else {
-                selectorRules[rule.selector] = [rule.test]
-            }
-            var inputElements = formElement.querySelectorAll(rule.selector)
-            
-            if (inputElements) {
-                inputElements.forEach(function(inputElement) {
-                    inputElement.onblur = function() {
-                        validate(inputElement, rule)
-                    }
-                    inputElement.onchange = function() {
-                        validate(inputElement, rule)
-                    }
-                    inputElement.onfocus = function () {
-                        getParent(inputElement, options.formGroupSelector).classList.remove('invalid')
-                    }
+// show the register and login modal when the user clicks on the register or login button
+openAuthFormWrappers.forEach(function(openAuthFormWrapper) {
+    openAuthFormWrapper.onmouseover = function(e) {
+        var openAuthFormBtns = e.currentTarget.querySelectorAll('.open-auth-form')
+        openAuthFormBtns.forEach(function(openAuthFormBtn, index) {
+            openAuthFormBtn.onclick = function() {
+                modal.style = 'display: flex';
+                authForms.forEach(function(authForm) {
+                    authForm.classList.remove('active');
                 })
-                // if (inputElement.type === 'radio') {
-                //     radioList.push(inputElement)
-                // }
-                // handle the blur event to require the user follows the rules
-                // inputElement.onblur = function() {
-                    // console.log(e.target)
-                    // var conditions = e.target !== showPassword
-                    // console.log(conditions)
-                    // if (conditions) {
-                    //     validate(inputElement, rule)
-                    // }
-                //     validate(inputElement, rule)
-                // }
-
-                // handle the focus event when the user clicks on the input
-                
-                // remove error messages when the user clicks on the input or inputs data
-                // inputElement.oninput = function () {
-                //     getParent(inputElement, options.formGroupSelector).classList.remove('invalid')
-                //     console.log(inputElement.value === options.getConfirm());
-                // }
-
-                // show and hide the password when the user clicks on eye icon
-                // const showPassword = getParent(inputElement, options.formGroupSelector).querySelector(options.showPassword)
-                // if (showPassword) {
-                //     showPassword.onclick = function () {
-                //         handlePassword(inputElement, rule)
-                //     }
-                // }
+                authForms[index].classList.add('active');
             }
         })
-        options.showHideRules.forEach(function(showHideRule) {
-            const showHideElement = document.querySelector(showHideRule.selector)
-            const showHideBtn = getParent(showHideElement, options.formGroupSelector).querySelector(options.showHide)
-            if (showHideElement) {
-                showHideBtn.onclick = function() {
-                    handlePassword(showHideElement, showHideRule)
+    }
+})
+
+// Display the register and login modal 
+// when the user taps on the user icon in tablet and mobile layouts.
+// headerMobileTabletUser.onclick = function() {
+//     modal.style = 'display: flex';
+//     authForms.forEach(function(authForm) {
+//         authForm.classList.remove('active');
+//     })
+//     authForms[0].classList.add('active');
+// }
+
+function switchElement(switchBtnSelector, switchElementSelector, className) {
+    var switchBtns = $$(switchBtnSelector)
+    var switchElements = $$(switchElementSelector)
+    switchBtns.forEach(function(switchBtn) {
+        switchBtn.onclick = function() {
+            switchElements.forEach(function(switchElement) {
+                switchElement.classList.toggle(className);
+            })
+        }
+    })
+}
+
+// When the user clicks the switch button, it toggles between the login and register forms
+switchElement('.auth-form__switch-btn', '.auth-form', 'active')
+
+// show and hide header search option when the user hovers on the search select button
+selectHoverBtns.forEach(function(selectHoverBtn) {
+    selectHoverBtn.onmouseover = function(e) {
+        e.stopPropagation();
+        var openElement = e.currentTarget.querySelector('.item--option-wrapper') || e.currentTarget.querySelector('.header__notif')
+        openElement.classList.add('active');
+    }
+})
+
+selectHoverBtns.forEach(function(selectHoverBtn) {
+    selectHoverBtn.onmouseleave = function(e) {
+        e.stopPropagation();
+        var openElement = e.currentTarget.querySelector('.item--option-wrapper') || e.currentTarget.querySelector('.header__notif')
+        openElement.classList.remove('active');
+    }
+})
+
+// show and hide header search option when the user clicks on the search select button
+// headerSearchSelect.onclick = function(e) {
+//     e.stopPropagation();
+//     headerSearchOption.classList.toggle('active');
+// }
+
+// Update the placeholder text of the header search input element
+// based on the option selected by the user in the header search option element. 
+headerSearchOptionItems.forEach(function(headerSearchOptionItem, index) {
+    headerSearchOptionItem.onclick = function() {
+        headerSearchInput.placeholder = placeHolders[index];
+    }
+})
+
+// Similar with headerMobileSearchInput.placeholder
+headerMobileSearchOptionItems.forEach(function(headerMobileSearchOptionItem, index) {
+    headerMobileSearchOptionItem.onclick = function() {
+        headerMobileSearchInput.placeholder = placeHolders[index];
+    }
+})
+
+// change the content of the header search input when the users clicks on one of the options
+// headerSearchHistoryItems.forEach(function(headerSearchHistoryItem) {
+//     headerSearchHistoryItem.onclick = function() {
+//         headerSearchHistory.classList.remove('active')
+//         searchInput.value = this.innerText
+// }
+// })
+
+// Display the header search history when the user clicks on the search input
+// Avoid using the :focus css property, as it keeps the header search history open even 
+// when the user clicks outside of the search input
+headerSearchInput.onfocus = function(e) {
+    e.stopPropagation()
+    headerSearchHistory.classList.add('active')
+}
+headerMobileSearchInput.onfocus = function(e) {
+    e.stopPropagation()
+    headerMobileSearchHistory.classList.add('active')
+}
+
+// open the item--option-wrapper when the user clicks on one of the selectContainers
+// selectBtns.forEach(function(selectBtn) {
+//     selectBtn.onclick = function(e) {
+//         e.stopPropagation()
+//         var itemOptionWrapper = e.currentTarget.closest('.select-container').querySelector('.item--option-wrapper')
+//         itemOptionWrapper.classList.add('active');
+//     }
+// })
+
+// close all item--option-wrapper and change the content of the header search input
+// when the users clicks on one of the options
+// add the check mark when the user clicks on one of the item--options 
+itemOptionWrappers.forEach(function(itemOptionWrapper) {
+    itemOptionWrapper.onclick = function(e) {
+        var itemOptionLink = e.target.closest('.option-link')
+        var optionContent = e.target.closest('.select-container').querySelector('.option-content')
+        if (e.target === itemOptionLink) {
+            itemOptionWrapper.classList.remove('active')
+            optionContent.textContent = itemOptionLink.textContent
+            if (optionContent.value !== undefined) {
+                optionContent.value = itemOptionLink.textContent
+            }
+        }
+        var itemOptionWithChecks = e.currentTarget.querySelectorAll('.item--option-with-check')
+        itemOptionWithChecks.forEach(function(itemOptionWithCheck) {
+            itemOptionWithCheck.classList.remove('selected');
+        })
+        if (e.target.closest('.item--option-with-check')) {
+            e.target.closest('.item--option-with-check').classList.add('selected');
+        }
+    }
+})
+
+// stop the propagation when the user clicks on the selectContainer element 
+// which leads to removing the active class
+selectContainers.forEach(function(selectContainer) {
+    selectContainer.onclick = function(e) {
+        e.stopPropagation();
+    }
+})
+
+// Show the number of products that the user adds to the cart
+numberOfProduct.innerText = headerCartItems.length
+console.log();
+
+// change the background color of the pseudo-element of the notification element 
+// when the user clicks on one of the items in the notification
+
+// headerNavbarUserItems[0].onmouseover = function() {
+//     headerNavbarUserContainer.classList.add("hovering")
+// }
+// headerNavbarUserItems[0].onmouseleave = function() {
+//     headerNavbarUserContainer.classList.remove("hovering")
+// }
+
+// Add class "btn--primary" to the containerFilterMenuBtn when the user clicks on one of the containerFilterMenuBtns
+// containerFilterMenuBtns.forEach(function(containerFilterMenuBtn) {
+//     containerFilterMenuBtn.onclick = function() {
+//         containerFilterMenuBtns.forEach(function(containerFilterMenuBtn) {
+//             containerFilterMenuBtn.classList.remove('btn--primary');
+//         })
+//         containerFilterMenuBtn.classList.add('btn--primary');
+//     }
+// })
+
+// when the user clicks on an item, change its background color or text color.
+// other items that are not selected should have the default background color or text color
+function activateByclick(selector, className) {
+    const selectorElements = $$(selector)
+    selectorElements.forEach(function(selectorElement) {
+        selectorElement.onclick = function() {
+            selectorElements.forEach(function(selectorElement) {
+                selectorElement.classList.remove(className)
+            })
+            selectorElement.classList.add(className)
+        }
+    })
+}
+
+activateByclick('.category-item', 'category-item-active')
+activateByclick('.container__filter-menu-btn', 'btn--primary')
+activateByclick('.container-filter-small__item-normal', 'active')
+activateByclick('.container-sort-bar__link-normal', 'active')
+// activateByclick('.pagination__number-btn', 'btn--primary')
+
+// Change like button's color to the primary color when the user clicks on it
+likeWrappers.forEach(function(likeWrapper) {
+    likeWrapper.onclick = function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        this.classList.toggle('active')
+    }
+})
+
+// Check propagation
+productItems.forEach(function(productItem) {
+    productItem.onclick = function(e) {
+        console.log('you also click on product item');
+    }
+})
+
+// change the star's color to yellow when the user clicks on it
+ratings.forEach(function(rating) {
+    rating.onmouseover = function(e) {
+        var stars = this.querySelectorAll('.product-main__action-star')
+        stars.forEach(function(star, index) {
+            star.onclick = function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                stars.forEach(function(star) {
+                    star.classList.remove('active')
+                })
+                for (var i = 0; i <= index; i++) {
+                    stars[i].classList.add('active')
                 }
             }
         })
+    }
+})
 
-        options.updateRules.forEach(function(updateRule) {
-            const updateElement = document.querySelector(updateRule.selector)
-            if (updateElement) {
-                updateElement.oninput = function() {
-                    update(updateElement, updateRule)
-                }
-            }
+// Generate the pagination pages based on the total page number
+for (var i = 0; i < totalPage; i++) {
+    var paginationPageBtn = document.createElement('button')
+    var pageNumber = document.createTextNode(i + 1)
+    paginationPageBtn.classList.add('pagination__page-btn')
+    paginationPageBtn.classList.add('btn')
+    paginationPageBtn.classList.add('btn--small')
+    paginationPageBtn.appendChild(pageNumber)
+    paginationPageWrapper.appendChild(paginationPageBtn)
+}
+
+// load current page
+function loadCurrentPage(currentPage) {
+    var paginationPageBtns = paginationPageWrapper.querySelectorAll('.pagination__page-btn')
+    paginationPageBtns.forEach(function(paginationPageBtn) {
+        paginationPageBtn.classList.remove('btn--primary')
+    })
+    paginationPageBtns[currentPage - 1].classList.add('btn--primary')
+}
+
+// change the number of pages when the user clicks on the prev or next button
+prevBtns.forEach(function(prevBtn) {
+    prevBtn.onclick = function() {
+        currentPage--
+        if (currentPage < 1) {
+            currentPage = totalPage
+        }
+        currentPageElement.innerText = currentPage
+        loadCurrentPage(currentPage)
+    }
+})
+
+nextBtns.forEach(function(nextBtn) {
+    nextBtn.onclick = function() {
+        currentPage++
+        if (currentPage > totalPage) {
+            currentPage = 1
+        }
+        currentPageElement.innerText = currentPage
+        loadCurrentPage(currentPage)
+    }
+})
+
+// change the page when the user clicks on the pagination page button
+var paginationPageBtns = paginationPageWrapper.querySelectorAll('.pagination__page-btn')
+paginationPageBtns.forEach(function(paginationPageBtn, index) {
+    paginationPageBtn.onclick = function() {
+        paginationPageBtns.forEach(function(paginationPageBtn) {
+            paginationPageBtn.classList.remove('btn--primary')
         })
+        paginationPageBtn.classList.add('btn--primary')
+        currentPage = index + 1
+        console.log(currentPage);
+        currentPageElement.innerText = currentPage
     }
+})
+
+loadCurrentPage(currentPage)
+
+// Display the icon pointing upwards or downwards 
+// based on whether the price is in ascending or descending order.
+containerSortBarLinks.forEach(function(containerSortBarLink, index) {
+    containerSortBarLink.onclick = function(e) {
+        upDownArrowIcons.forEach(function(upDownArrowIcon) {
+            upDownArrowIcon.style = 'display: none;'
+        })
+        upDownArrowIcons[index].style = 'display: block;'
+    }
+})
+
+// Display the header search, hide the header logo and header search icon
+// when the user taps on the search icon on mobile display.
+headerMobileSearchIconWrapper.onclick = function(e) {
+    e.stopPropagation()
+    headerMobileSearch.classList.toggle('active')
+    // containerSortBar.classList.toggle('hidden')
+    // setTimeout(function() {
+    //     headerMobileSearchInput.click()
+    //     headerMobileSearchInput.focus()
+    // }, 1000)
+    // headerMobileSearchInput.focus()
+
 }
 
-// require user to not leave the input blank
-validator.isRequired = function(selector, message) {
-    return {
-        selector,
-        test(value) {
-            var result = typeof value === 'string' ? value.trim() : value;
-            return result ? undefined : message || 'Vui lòng nhập trường này!'
-        }
-    }
+// close item--option-wrapper when the user selects one of the item-options
+// close the header search history when the user clicks on the area outside of the search input
+// close the header search, display the header logo and header search input
+// when the user taps on the area outside the search icon on mobile display.
+document.onclick = function() {
+    headerSearch.classList.add('hide-on-mobile')
+    // headerSearchHistory.classList.remove('active')
+    itemOptionWrappers.forEach(function(itemOptionWrapper) {
+        itemOptionWrapper.classList.remove('active')
+    })
+    headerMobileSearch.classList.remove('active')
+    // containerSortBar.classList.remove('hidden')
+    headerMobileList.classList.remove('open')
 }
 
-// require user to input enough letters for this field
-validator.isMinLength = function(selector, num, message) {
-    return {
-        selector,
-        test(value) {
-            return value.length >= num ? undefined : message || `Vui lòng nhập tối thiểu ${num} ký tự!`
+// Delete the product from the cart when the user clicks on the trash can icon next to it
+function deleteProduct(deleteBtnSelector, deleteElementSelector) {
+    var deleteBtns = $$(deleteBtnSelector)
+    deleteBtns.forEach(function(deleteBtn) {
+        deleteBtn.onclick = function(e) {
+            e.target.closest(deleteElementSelector).style.display = 'none'
         }
+    })
+}
+deleteProduct('.header__cart-item-delete', '.header__cart-item')
+deleteProduct('.header__cart-item-delete-icon', '.header__cart-item')
+
+
+// Show or hide element when the user clicks on the toggle button
+function showElement(openBtnSelector, openElementSelector, className) {
+    var openBtn = $(openBtnSelector)
+    var openElement = $(openElementSelector)
+    openBtn.onclick = function(e) {
+        e.stopPropagation()
+        openElement.classList.toggle(className)
+        console.log('you have clicked');
     }
+}
+showElement('.header-mobile-list-icon', '.header-mobile-list', 'open')
+
+// Show or hide header notification when the user clicks on the header cart wrapper
+// const headerCartWrap = $('.header__cart-wrap')
+// const headerCartHasCart = $('.header__cart-has-cart')
+// headerCartWrap.onclick = function () {
+//     if (headerCartHasCart.classList.contains('active')) {
+//         headerCartHasCart.classList.remove('active')
+//     }    
+//     headerCartHasCart.classList.add('active')
+// }
+// showElement('.header__cart-wrap', '.header__cart-has-cart', 'active')
+
+
+// Hide the mobile list on mobile devices when the users click on one of the categoryItemLinks
+function closeElement(closeBtnSelector, closeElementSelector, className) {
+    var closeBtns = $$(closeBtnSelector)
+    var closeElement = $(closeElementSelector)
+    closeBtns.forEach(function(closeBtn) {
+        closeBtn.onclick = function() {
+            closeElement.classList.remove(className)
+        }
+    })
+}
+closeElement('.header-mobile-list__item-link', '.header-mobile-list', 'open')
+
+// Stop propagation
+categoryWrapper.onclick = function(e) {
+    e.stopPropagation()
 }
 
-// require the user to provide a valid email format
-validator.isEmail = function(selector, message) {
-    return {
-        selector,
-        test(value) {
-            const emailPattern = new RegExp(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/, 'g')
-            return emailPattern.test(value) ? undefined : message || 'Vui lòng nhập chính xác email!'
-        }
-    }
+headerMobileList.onclick = function(e) {
+    e.stopPropagation()
 }
 
-// confirm the password
-validator.isConfirmed = function(selector, getConfirmValue, message, confirmSelector) {
-    return {
-        selector,
-        confirmSelector,
-        test(value) {
-            return value === getConfirmValue() ? undefined : message || 'Giá trị nhập vào không chính xác!'
-        }
-    }
+// On mobile display, when the user clicks on the price option button,
+// display an arrow icon (either up or down) next to it
+// This button toggles between ascending and descending price order
+// When the user clicks the switch button, it toggles between ascending and descending price order
+headerSortLinkSelect.onclick = function () {
+    upDownArrowIconWrapper.style.display = 'none'
+    headerSortIconPrices[0].classList.toggle('active')
+    switchElement('.container-sort-bar__link-select', '.container-sort-bar__icon-price', 'active')
 }
 
-// show and hide the password
-validator.showHide = function(selector, message) {
-    return {
-        selector,
-        test(type) {
-            return type === 'password'
-        }
+// Show the underline of the container sort bar item when the user clicks on it
+containerSortBarItems.forEach(function(containerSortBarItem, index) {
+    var containerSortBarItemWidth = containerSortBarItem.offsetWidth
+    containerSortBarUnderline.style.width = `${containerSortBarItemWidth}px`;
+    containerSortBarItem.onclick = function (e) {
+        containerSortBarUnderline.style = `
+        width: ${containerSortBarItemWidth}px;
+        transform: translateX(calc(${containerSortBarItemWidth}px * ${index})) 
+        `
     }
-}
-
-// show and hide the password after the user clicks on eye icon
-// this function is no longer used
-showPassword = function(selector) {
-    const passwordElement = document.querySelector(selector)
-    const showPassword = passwordElement.parentElement.querySelector('.show-password')
-    showPassword.onclick = function() {
-        if (passwordElement.type === 'password') {
-            passwordElement.type = 'text'
-            showPassword.innerHTML = '<i class="fa-regular fa-eye-slash"></i>'
-        } else {
-            passwordElement.type = 'password'
-            showPassword.innerHTML = '<i class="fa-regular fa-eye"></i>'
-        }
-    }
-}
+})
